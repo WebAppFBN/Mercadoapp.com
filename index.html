@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MercadosApp - Encuentra los mejores precios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f5f5f4; color: #1c191c; min-height: 100vh; }
+        
+        /* Navbar */
+        .navbar { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; padding: 0 1.5rem; border-bottom: 1px solid #e7e5e4; }
+        .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 64px; }
+        .logo { font-size: 1.3rem; font-weight: 800; color: #1c191c; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1rem; }
+        .logo span { color: #16a34a; }
+        .nav-links { display: flex; gap: 0.75rem; align-items: center; }
+        .nav-btn { padding: 0.4rem 1rem; border-radius: 9999px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: inherit; display: flex; align-items: center; gap: 0.4rem; }
+        .nav-btn-primary { background: #22c55e; color: white; }
+        .nav-btn-primary:hover { background: #16a34a; transform: translateY(-1px); }
+        .nav-btn-outline { background: transparent; color: #44403c; border: 1.5px solid #e7e5e4; }
+        .nav-btn-outline:hover { background: #f5f5f4; }
+        .nav-btn-danger { background: #ef4444; color: white; }
+        .nav-btn-danger:hover { background: #dc2626; }
+        .user-badge { display: flex; align-items: center; gap: 0.5rem; background: #f0fdf4; padding: 0.2rem 0.7rem 0.2rem 0.2rem; border-radius: 9999px; font-weight: 600; font-size: 0.85rem; color: #16a34a; border: 1.5px solid #bbf7d0; }
+        .user-avatar { width: 30px; height: 30px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem; }
+        .hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; }
+        .hamburger span { width: 24px; height: 2.5px; background: #44403c; border-radius: 2px; transition: all 0.2s; }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem; }
+        
+        /* Hero */
+        .hero-section { text-align: center; padding: 2rem 0 2.5rem; }
+        .hero-badge { display: inline-block; background: #dcfce7; color: #16a34a; padding: 0.25rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .hero-title { font-size: 2.5rem; font-weight: 900; color: #1c191c; margin-bottom: 0.5rem; line-height: 1.1; }
+        .hero-title .gradient-text { background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 1.1rem; color: #78716c; max-width: 500px; margin: 0 auto 1.5rem; }
+
+        /* Search */
+        .search-box { max-width: 560px; margin: 0 auto 1.5rem; position: relative; }
+        .search-box .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #a8a29e; font-size: 1rem; }
+        .search-box input { width: 100%; padding: 0.7rem 1rem 0.7rem 3rem; border-radius: 9999px; border: 2px solid #e7e5e4; font-size: 0.95rem; outline: none; transition: all 0.2s; background: white; font-family: inherit; }
+        .search-box input:focus { border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,0.1); }
+
+        /* Filters */
+        .filters-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; align-items: center; justify-content: center; }
+        .filter-group { display: flex; align-items: center; gap: 0.4rem; background: white; padding: 0.25rem 0.6rem 0.25rem 0.8rem; border-radius: 9999px; border: 1.5px solid #e7e5e4; transition: all 0.2s; }
+        .filter-group:hover { border-color: #86efac; }
+        .filter-group i { color: #a8a29e; font-size: 0.75rem; }
+        .filter-group select { padding: 0.35rem 0.2rem 0.35rem 0; border: none; background: transparent; font-size: 0.85rem; font-weight: 500; color: #44403c; outline: none; cursor: pointer; font-family: inherit; min-width: 110px; }
+        .results-count { font-size: 0.85rem; color: #78716c; font-weight: 500; }
+
+        /* Products Grid */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: all 0.3s; cursor: pointer; border: 1px solid rgba(255,255,255,0.8); }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-color: #bbf7d0; }
+        .product-image { width: 100%; height: 140px; background: #f5f5f4; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; border-bottom: 1px solid #e7e5e4; }
+        .product-badge { position: absolute; top: 0.5rem; right: 0.5rem; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 0.2rem 0.7rem; border-radius: 9999px; font-size: 0.6rem; font-weight: 700; }
+        .product-body { padding: 0.7rem 0.8rem 0.8rem; }
+        .product-name { font-weight: 700; font-size: 0.95rem; color: #1c191c; margin-bottom: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-market { color: #78716c; font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+        .product-price-section { display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 0.2rem; flex-wrap: wrap; }
+        .product-price { font-size: 1.2rem; font-weight: 800; color: #16a34a; }
+        .product-price strike { color: #a8a29e; font-weight: 400; font-size: 0.75rem; }
+        .product-offer-tag { background: #dcfce7; color: #16a34a; padding: 0.05rem 0.4rem; border-radius: 9999px; font-size: 0.55rem; font-weight: 700; }
+        .product-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid #f5f5f4; font-size: 0.65rem; color: #a8a29e; }
+        .market-badge { display: inline-flex; align-items: center; gap: 0.2rem; background: #f5f5f4; padding: 0.05rem 0.5rem; border-radius: 9999px; font-size: 0.65rem; color: #57534e; font-weight: 500; }
+        .market-badge i { color: #f59e0b; font-size: 0.5rem; }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; gap: 0.3rem; margin-top: 1.5rem; }
+        .pagination button { padding: 0.35rem 0.7rem; min-width: 36px; border-radius: 8px; border: 1px solid #e7e5e4; background: white; cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.8rem; color: #44403c; font-family: inherit; }
+        .pagination button:hover:not(:disabled) { background: #f0fdf4; border-color: #22c55e; color: #16a34a; }
+        .pagination button.active { background: #22c55e; color: white; border-color: #22c55e; }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal { background: white; border-radius: 16px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.5rem; animation: slideUp 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .modal-title { font-size: 1.2rem; font-weight: 700; color: #1c191c; }
+        .modal-title i { margin-right: 0.4rem; color: #22c55e; }
+        .modal-close { background: #f5f5f4; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; color: #78716c; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .modal-close:hover { background: #e7e5e4; transform: rotate(90deg); }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; max-width: 360px; width: 100%; }
+        .toast { padding: 0.7rem 1.2rem; border-radius: 10px; color: white; font-weight: 500; font-size: 0.85rem; animation: slideInRight 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 0.5rem; }
+        .toast i { font-size: 1rem; }
+        .toast-success { background: #22c55e; }
+        .toast-error { background: #ef4444; }
+        .toast-info { background: #3b82f6; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-exit { animation: slideOutRight 0.3s ease forwards; }
+        @keyframes slideOutRight { to { transform: translateX(100%); opacity: 0; } }
+        .empty-state { text-align: center; padding: 2.5rem 1rem; color: #78716c; }
+        .empty-state .empty-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+        .empty-state h3 { font-size: 1.1rem; color: #44403c; margin-bottom: 0.2rem; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: white; padding: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 1px solid #e7e5e4; gap: 0.4rem; }
+            .nav-links.open { display: flex; }
+            .nav-links .nav-btn { width: 100%; justify-content: center; }
+            .hamburger { display: flex; }
+            .hero-title { font-size: 1.8rem; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.6rem; }
+            .product-image { height: 100px; font-size: 2.5rem; }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+            .filter-group { width: 100%; }
+            .filter-group select { width: 100%; min-width: auto; }
+            .toast-container { left: 1rem; right: 1rem; bottom: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+            .product-image { height: 80px; font-size: 2rem; }
+            .product-name { font-size: 0.7rem; }
+            .product-price { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <div class="logo" onclick="location.reload()">
+                <span class="logo-icon">M</span>
+                Mercados<span>App</span>
+            </div>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="admin.html" class="nav-btn nav-btn-outline"><i class="fas fa-chart-pie"></i> Admin</a>
+                <a href="usuarios.html" class="nav-btn nav-btn-outline"><i class="fas fa-users"></i> Usuarios</a>
+                <button class="nav-btn nav-btn-primary" onclick="showToast('Bienvenido a MercadosApp!','success')">
+                    <i class="fas fa-shopping-bag"></i> Comprar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <div class="container">
+            <!-- Hero -->
+            <div class="hero-section">
+                <div class="hero-badge"><i class="fas fa-store"></i> 5 mercados disponibles</div>
+                <h1 class="hero-title">Encuentra los mejores<br><span class="gradient-text">precios cerca de ti</span></h1>
+                <p class="hero-subtitle">Compara precios en mercados y supermercados</p>
+
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar productos..." onkeyup="if(event.key==='Enter') doSearch()" />
+                </div>
+
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <i class="fas fa-store-alt"></i>
+                        <select id="marketFilter" onchange="applyFilters()">
+                            <option value="all">Todos los mercados</option>
+                            <option value="m1">🏪 Mercado Central</option>
+                            <option value="m2">🛒 Supermercado El Pueblo</option>
+                            <option value="m3">🏬 Plaza de Abastos</option>
+                            <option value="m4">🏪 Mercado San José</option>
+                            <option value="m5">🛒 Supermercado La 70</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <i class="fas fa-sort"></i>
+                        <select id="sortFilter" onchange="applyFilters()">
+                            <option value="price_asc">Menor precio</option>
+                            <option value="price_desc">Mayor precio</option>
+                            <option value="newest">Más reciente</option>
+                        </select>
+                    </div>
+                    <span class="results-count" id="resultsCount">20 productos</span>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="productsContainer"></div>
+        </div>
+    </main>
+
+    <!-- ============================================
+    JAVASCRIPT - LÓGICA COMPLETA
+    ============================================ -->
+    <script>
+        // ============================================
+        // DATOS DE EJEMPLO
+        // ============================================
+        const products = [
+            { id: 'p1', name: 'Tomate', category: 'Verduras', unit: 'kg', price: 3000, marketId: 'm1',
+                image: '🍅', updatedAt: '2026-06-20 10:30', hasOffer: false },
+            { id: 'p2', name: 'Papa Criolla', category: 'Verduras', unit: 'kg', price: 2500, marketId: 'm1',
+                image: '🥔', updatedAt: '2026-06-20 09:15', hasOffer: true, offerPrice: 1900,
+                offerDescription: 'Oferta especial' },
+            { id: 'p3', name: 'Cebolla', category: 'Verduras', unit: 'kg', price: 2000, marketId: 'm1',
+                image: '🧅', updatedAt: '2026-06-19 15:30', hasOffer: false },
+            { id: 'p4', name: 'Zanahoria', category: 'Verduras', unit: 'kg', price: 1800, marketId: 'm1',
+                image: '🥕', updatedAt: '2026-06-19 12:00', hasOffer: false },
+            { id: 'p5', name: 'Aguacate', category: 'Frutas', unit: 'unidad', price: 2500, marketId: 'm1',
+                image: '🥑', updatedAt: '2026-06-19 08:00', hasOffer: false },
+            { id: 'p6', name: 'Pollo Entero', category: 'Carnes', unit: 'kg', price: 12000, marketId: 'm2',
+                image: '🍗', updatedAt: '2026-06-19 16:45', hasOffer: false },
+            { id: 'p7', name: 'Huevos', category: 'Lácteos', unit: 'docena', price: 8000, marketId: 'm2',
+                image: '🥚', updatedAt: '2026-06-19 14:20', hasOffer: false },
+            { id: 'p8', name: 'Queso Fresco', category: 'Lácteos', unit: 'kg', price: 12000, marketId: 'm2',
+                image: '🧀', updatedAt: '2026-06-18 09:00', hasOffer: false },
+            { id: 'p9', name: 'Limón', category: 'Frutas', unit: 'kg', price: 1800, marketId: 'm2',
+                image: '🍋', updatedAt: '2026-06-18 07:30', hasOffer: false },
+            { id: 'p10', name: 'Arroz', category: 'Granos', unit: 'kg', price: 5200, marketId: 'm2',
+                image: '🍚', updatedAt: '2026-06-17 16:00', hasOffer: false },
+            { id: 'p11', name: 'Leche Entera', category: 'Lácteos', unit: 'litro', price: 4000, marketId: 'm3',
+                image: '🥛', updatedAt: '2026-06-18 11:00', hasOffer: true, offerPrice: 3200,
+                offerDescription: '2x1 en leche' },
+            { id: 'p12', name: 'Manzana', category: 'Frutas', unit: 'kg', price: 6000, marketId: 'm3',
+                image: '🍎', updatedAt: '2026-06-17 17:00', hasOffer: false },
+            { id: 'p13', name: 'Carne Molida', category: 'Carnes', unit: 'kg', price: 15000, marketId: 'm3',
+                image: '🥩', updatedAt: '2026-06-17 10:00', hasOffer: false },
+            { id: 'p14', name: 'Panela', category: 'Granos', unit: 'kg', price: 3500, marketId: 'm3',
+                image: '🍯', updatedAt: '2026-06-16 08:00', hasOffer: false },
+            { id: 'p15', name: 'Papa Pastusa', category: 'Verduras', unit: 'kg', price: 2200, marketId: 'm4',
+                image: '🥔', updatedAt: '2026-06-17 14:00', hasOffer: false },
+            { id: 'p16', name: 'Pescado', category: 'Carnes', unit: 'kg', price: 18000, marketId: 'm4',
+                image: '🐟', updatedAt: '2026-06-16 14:00', hasOffer: false },
+            { id: 'p17', name: 'Yuca', category: 'Verduras', unit: 'kg', price: 2800, marketId: 'm4',
+                image: '🌿', updatedAt: '2026-06-16 10:00', hasOffer: false },
+            { id: 'p18', name: 'Naranja', category: 'Frutas', unit: 'kg', price: 3200, marketId: 'm5',
+                image: '🍊', updatedAt: '2026-06-18 15:00', hasOffer: false },
+            { id: 'p19', name: 'Pechuga de Pollo', category: 'Carnes', unit: 'kg', price: 14000, marketId: 'm5',
+                image: '🍗', updatedAt: '2026-06-18 13:00', hasOffer: false },
+            { id: 'p20', name: 'Queso Costeño', category: 'Lácteos', unit: 'kg', price: 10000, marketId: 'm5',
+                image: '🧀', updatedAt: '2026-06-17 11:00', hasOffer: false },
+        ];
+
+        const markets = [
+            { id: 'm1', name: 'Mercado Central', icon: '🏪', rating: 4.8 },
+            { id: 'm2', name: 'Supermercado El Pueblo', icon: '🛒', rating: 4.5 },
+            { id: 'm3', name: 'Plaza de Abastos', icon: '🏬', rating: 4.6 },
+            { id: 'm4', name: 'Mercado San José', icon: '🏪', rating: 4.3 },
+            { id: 'm5', name: 'Supermercado La 70', icon: '🛒', rating: 4.7 },
+        ];
+
+        // ============================================
+        // ESTADO
+        // ============================================
+        let searchTerm = '';
+        let selectedMarket = 'all';
+        let sortBy = 'price_asc';
+        let currentPage = 1;
+        const itemsPerPage = 12;
+
+        // ============================================
+        // FUNCIONES DE RENDERIZADO
+        // ============================================
+        function getFilteredProducts() {
+            let filtered = [...products];
+
+            if (searchTerm.trim()) {
+                const term = searchTerm.toLowerCase().trim();
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(term) ||
+                    p.category.toLowerCase().includes(term)
+                );
+            }
+
+            if (selectedMarket !== 'all') {
+                filtered = filtered.filter(p => p.marketId === selectedMarket);
+            }
+
+            switch (sortBy) {
+                case 'price_asc': filtered.sort((a, b) => a.price - b.price); break;
+                case 'price_desc': filtered.sort((a, b) => b.price - a.price); break;
+                case 'newest': filtered.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)); break;
+            }
+
+            return filtered;
+        }
+
+        function getPaginatedProducts(filtered) {
+            const start = (currentPage - 1) * itemsPerPage;
+            return filtered.slice(start, start + itemsPerPage);
+        }
+
+        function renderProducts() {
+            const filtered = getFilteredProducts();
+            const paginated = getPaginatedProducts(filtered);
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const container = document.getElementById('productsContainer');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">🔍</span>
+                        <h3>No se encontraron productos</h3>
+                        <p class="text-muted">Prueba con otro término de búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="products-grid">';
+            paginated.forEach((p, i) => {
+                const market = markets.find(m => m.id === p.marketId);
+                const priceHtml = p.hasOffer ?
+                    `<div class="product-price-section">
+                        <span class="product-price">$${p.offerPrice.toLocaleString()}</span>
+                        <strike>$${p.price.toLocaleString()}</strike>
+                        <span class="product-offer-tag">OFERTA</span>
+                    </div>` :
+                    `<div class="product-price-section">
+                        <span class="product-price">$${p.price.toLocaleString()}</span>
+                        <span style="font-size:0.65rem;color:#a8a29e;">/${p.unit}</span>
+                    </div>`;
+
+                html += `
+                    <div class="product-card" onclick="showProductDetail('${p.id}')">
+                        <div class="product-image">
+                            ${p.image || '📦'}
+                            ${p.hasOffer ? '<span class="product-badge">🔥 OFERTA</span>' : ''}
+                        </div>
+                        <div class="product-body">
+                            <div class="product-name" title="${p.name}">${p.name}</div>
+                            <div class="product-market">
+                                <i class="fas fa-store"></i> ${market ? market.name : ''}
+                                ${market ? `<span class="market-badge"><i class="fas fa-star"></i> ${market.rating}</span>` : ''}
+                            </div>
+                            ${priceHtml}
+                            <div class="product-meta">
+                                <span><i class="far fa-clock"></i> ${p.updatedAt}</span>
+                                <span><i class="fas fa-tag"></i> ${p.category}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            if (totalPages > 1) {
+                html += '<div class="pagination">';
+                html += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    html += `<button onclick="changePage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+                }
+                html += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+            document.getElementById('resultsCount').textContent = `${filtered.length} productos`;
+        }
+
+        // ============================================
+        // ACCIONES
+        // ============================================
+        function doSearch() {
+            const input = document.getElementById('searchInput');
+            searchTerm = input ? input.value : '';
+            currentPage = 1;
+            renderProducts();
+        }
+
+        function applyFilters() {
+            const marketFilter = document.getElementById('marketFilter');
+            const sortFilter = document.getElementById('sortFilter');
+            if (marketFilter) selectedMarket = marketFilter.value;
+            if (sortFilter) sortBy = sortFilter.value;
+            currentPage = 1;
+            renderProducts();
+        }
+
+        function changePage(page) {
+            const filtered = getFilteredProducts();
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderProducts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================================
+        // MODAL
+        // ============================================
+        function showProductDetail(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) { showToast('Producto no encontrado', 'error'); return; }
+            const market = markets.find(m => m.id === product.marketId);
+
+            const html = `
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-info-circle"></i> ${product.name}</h3>
+                    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <div style="text-align:center;font-size:3.5rem;padding:0.5rem 0;">${product.image || '📦'}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.8rem;">
+                    <div style="background:#fafaf9;padding:0.4rem 0.6rem;border-radius:8px;font-size:0.8rem;">
+                        <div style="color:#78716c;font-size:0.65rem;">Mercado</div>
+                        <strong>${market ? market.name : 'N/A'}</strong>
+                    </div>
+                    <div style="background:#fafaf9;padding:0.4rem 0.6rem;border-radius:8px;font-size:0.8rem;">
+                        <div style="color:#78716c;font-size:0.65rem;">Categoría</div>
+                        <strong>${product.category}</strong>
+                    </div>
+                    <div style="background:#fafaf9;padding:0.4rem 0.6rem;border-radius:8px;font-size:0.8rem;">
+                        <div style="color:#78716c;font-size:0.65rem;">Unidad</div>
+                        <strong>${product.unit}</strong>
+                    </div>
+                    <div style="background:#fafaf9;padding:0.4rem 0.6rem;border-radius:8px;font-size:0.8rem;">
+                        <div style="color:#78716c;font-size:0.65rem;">Precio</div>
+                        <strong style="font-size:1.1rem;color:#16a34a;">$${product.price.toLocaleString()}</strong>
+                    </div>
+                </div>
+                ${product.hasOffer ? `
+                    <div style="background:#f0fdf4;padding:0.6rem;border-radius:8px;margin-bottom:0.8rem;border:1px solid #bbf7d0;font-size:0.85rem;">
+                        <strong style="color:#16a34a;">🔥 Oferta: $${product.offerPrice.toLocaleString()}</strong>
+                        ${product.offerDescription ? `<div style="color:#78716c;font-size:0.75rem;">${product.offerDescription}</div>` : ''}
+                    </div>
+                ` : ''}
+                <div style="font-size:0.65rem;color:#a8a29e;text-align:center;margin-bottom:0.8rem;">
+                    <i class="far fa-clock"></i> ${product.updatedAt}
+                </div>
+                <button class="nav-btn nav-btn-primary" onclick="closeModal()" style="width:100%;justify-content:center;font-size:0.9rem;padding:0.6rem;">
+                    <i class="fas fa-store"></i> Cerrar
+                </button>
+            `;
+
+            document.getElementById('modalContent').innerHTML = html;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', info: 'fas fa-info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<i class="${icons[type] || icons.info}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================
+        // MENÚ MÓVIL
+        // ============================================
+        function toggleMenu() {
+            const links = document.getElementById('navLinks');
+            const hamburger = document.getElementById('hamburger');
+            links.classList.toggle('open');
+            hamburger.classList.toggle('active');
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        renderProducts();
+        console.log('🛒 MercadosApp - Página Pública cargada correctamente');
+        console.log('📦 Productos disponibles:', products.length);
+        console.log('🏪 Mercados:', markets.length);
+    </script>
+</body>
+</html>

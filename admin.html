@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MercadosApp - Panel de Administración</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1c191c; min-height: 100vh; }
+
+        /* Admin Layout */
+        .admin-layout { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width: 250px; background: #0f172a; color: #e2e8f0; padding: 1.5rem; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; z-index: 100; }
+        .sidebar-logo { font-size: 1.2rem; font-weight: 800; color: white; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .sidebar-logo span { color: #34d399; }
+        .sidebar-menu { list-style: none; padding: 0; }
+        .sidebar-menu li { margin-bottom: 0.2rem; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; color: #94a3b8; text-decoration: none; transition: all 0.2s; cursor: pointer; font-size: 0.85rem; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-menu a i { width: 20px; text-align: center; }
+        .sidebar-menu .badge { margin-left: auto; background: #34d399; color: #0f172a; padding: 0.05rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: 600; }
+        .sidebar-divider { border-top: 1px solid rgba(255,255,255,0.06); margin: 1rem 0; }
+
+        /* Main Content */
+        .main-content { margin-left: 250px; padding: 1.5rem; flex: 1; min-height: 100vh; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .panel-header h1 { font-size: 1.5rem; font-weight: 800; }
+        .panel-header .subtitle { color: #64748b; font-size: 0.85rem; }
+
+        /* Cards */
+        .card { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 1.25rem; border: 1px solid #e2e8f0; }
+        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-title i { color: #22c55e; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem; }
+        .stat-card { background: white; padding: 0.8rem 1rem; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-card .stat-number { font-size: 1.5rem; font-weight: 800; color: #1c191c; }
+        .stat-card .stat-label { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+        .stat-card .stat-icon { font-size: 1.3rem; display: block; margin-bottom: 0.1rem; }
+
+        /* Tabs */
+        .dashboard-tabs { display: flex; gap: 0.3rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3rem; flex-wrap: wrap; }
+        .dashboard-tab { padding: 0.4rem 1rem; border: none; background: none; font-weight: 600; font-size: 0.85rem; color: #94a3b8; cursor: pointer; border-radius: 8px; transition: all 0.2s; font-family: inherit; display: flex; align-items: center; gap: 0.4rem; }
+        .dashboard-tab:hover { background: #f1f5f9; color: #475569; }
+        .dashboard-tab.active { color: #22c55e; background: #f0fdf4; }
+        .dashboard-content { display: none; }
+        .dashboard-content.active { display: block; }
+
+        /* Forms */
+        .form-group { margin-bottom: 0.8rem; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.8rem; color: #475569; margin-bottom: 0.2rem; }
+        .form-group label .required { color: #ef4444; margin-left: 0.15rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.5rem 0.7rem; border-radius: 8px; border: 1.5px solid #e2e8f0; font-size: 0.85rem; outline: none; transition: all 0.2s; font-family: inherit; background: white; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.08); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .form-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .form-actions button { flex: 1; padding: 0.5rem; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .btn-submit { background: #22c55e; color: white; }
+        .btn-submit:hover { background: #16a34a; }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
+        .btn-cancel:hover { background: #e2e8f0; }
+        .btn-primary { background: #22c55e; color: white; padding: 0.4rem 1rem; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: inherit; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .btn-primary:hover { background: #16a34a; }
+        .btn-danger { background: #ef4444; color: white; padding: 0.3rem 0.8rem; border: none; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-edit { background: #f0fdf4; color: #16a34a; padding: 0.2rem 0.6rem; border: none; border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .btn-edit:hover { background: #dcfce7; }
+
+        /* Table */
+        .table-container { overflow-x: auto; background: white; border-radius: 12px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead { background: #f8fafc; }
+        th { text-align: left; padding: 0.6rem 0.8rem; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:hover td { background: #f8fafc; }
+        .table-actions { display: flex; gap: 0.3rem; }
+        .status-badge { padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-badge.active { background: #dcfce7; color: #16a34a; }
+        .status-badge.inactive { background: #fef2f2; color: #ef4444; }
+        .status-badge.offer { background: #fef3c7; color: #d97706; }
+
+        .empty-state { text-align: center; padding: 2.5rem 1rem; color: #64748b; }
+        .empty-state .empty-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+        .empty-state h3 { font-size: 1.1rem; color: #1c191c; margin-bottom: 0.2rem; }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; max-width: 360px; width: 100%; }
+        .toast { padding: 0.7rem 1.2rem; border-radius: 10px; color: white; font-weight: 500; font-size: 0.85rem; animation: slideInRight 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 0.5rem; }
+        .toast i { font-size: 1rem; }
+        .toast-success { background: #22c55e; }
+        .toast-error { background: #ef4444; }
+        .toast-info { background: #3b82f6; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-exit { animation: slideOutRight 0.3s ease forwards; }
+        @keyframes slideOutRight { to { transform: translateX(100%); opacity: 0; } }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal { background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.5rem; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+        .modal-title { font-size: 1.1rem; font-weight: 700; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .hamburger-admin { display: block !important; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .panel-header h1 { font-size: 1.2rem; }
+        }
+
+        .hamburger-admin { display: none; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #1c191c; padding: 0.3rem; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 99; }
+        .sidebar-overlay.active { display: block; }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .w-full { width: 100%; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+
+    <!-- Admin Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <span style="background:#34d399;padding:0.2rem 0.5rem;border-radius:6px;color:#0f172a;">M</span>
+                Mercados<span>Panel</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="active" onclick="switchTab('dashboard')"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a onclick="switchTab('productos')"><i class="fas fa-box"></i> Productos <span class="badge" id="sidebarCount">0</span></a></li>
+                <li><a onclick="switchTab('ofertas')"><i class="fas fa-tags"></i> Ofertas <span class="badge" id="offerCount">0</span></a></li>
+                <li><a onclick="switchTab('usuarios')"><i class="fas fa-users"></i> Usuarios</a></li>
+                <div class="sidebar-divider"></div>
+                <li><a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                <li><a href="index.html"><i class="fas fa-eye"></i> Ver Sitio</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="panel-header">
+                <div>
+                    <button class="hamburger-admin" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h1 id="panelTitle">📊 Panel de Control</h1>
+                    <div class="subtitle">Gestiona tus productos y ofertas</div>
+                </div>
+                <div>
+                    <button class="btn-primary" onclick="guardarDatos()"><i class="fas fa-save"></i> Guardar</button>
+                    <a href="index.html" class="btn-primary" style="text-decoration:none;"><i class="fas fa-eye"></i> Ver Sitio</a>
+                </div>
+            </div>
+
+            <!-- Tab: Dashboard -->
+            <div class="dashboard-content active" id="tab-dashboard">
+                <div class="stats-grid" id="statsContainer">
+                    <div class="stat-card">
+                        <span class="stat-icon">📦</span>
+                        <div class="stat-number" id="statProductos">0</div>
+                        <div class="stat-label">Productos</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🏷️</span>
+                        <div class="stat-number" id="statOfertas">0</div>
+                        <div class="stat-label">Ofertas Activas</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">👤</span>
+                        <div class="stat-number" id="statUsuarios">0</div>
+                        <div class="stat-label">Usuarios</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-number" id="statCategorias">0</div>
+                        <div class="stat-label">Categorías</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-rocket"></i> Acciones Rápidas</div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                        <button class="btn-primary" onclick="switchTab('productos')"><i class="fas fa-plus"></i> Agregar Producto</button>
+                        <button class="btn-primary" onclick="switchTab('ofertas')"><i class="fas fa-tag"></i> Crear Oferta</button>
+                        <button class="btn-primary" onclick="switchTab('usuarios')"><i class="fas fa-user-plus"></i> Gestionar Usuarios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Productos -->
+            <div class="dashboard-content" id="tab-productos">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-box"></i> Gestión de Productos
+                        <button class="btn-primary" onclick="openProductModal()" style="margin-left:auto;"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
+                    <div class="form-group" style="max-width:280px;">
+                        <input type="text" id="searchProduct" placeholder="🔍 Buscar productos..." oninput="filterProducts()" />
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Imagen</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="productTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="productPagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:0.8rem;flex-wrap:wrap;gap:0.5rem;">
+                        <span id="productCountDisplay" style="color:#64748b;font-size:0.85rem;">0 productos</span>
+                        <div style="display:flex;gap:0.3rem;">
+                            <button class="btn-edit" onclick="changeProductPage('prev')"><i class="fas fa-chevron-left"></i></button>
+                            <span id="productPageDisplay" style="padding:0.2rem 0.8rem;background:#f1f5f9;border-radius:6px;font-size:0.85rem;">1</span>
+                            <button class="btn-edit" onclick="changeProductPage('next')"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Ofertas -->
+            <div class="dashboard-content" id="tab-ofertas">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-tags"></i> Gestión de Ofertas
+                        <button class="btn-primary" onclick="switchTab('productos')" style="margin-left:auto;"><i class="fas fa-plus"></i> Crear Oferta</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Producto</th><th>Precio Oferta</th><th>Vigencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="offerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Usuarios -->
+            <div class="dashboard-content" id="tab-usuarios">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-users"></i> Gestión de Usuarios
+                        <a href="usuarios.html" class="btn-primary" style="margin-left:auto;text-decoration:none;"><i class="fas fa-user-plus"></i> Registrar</a>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="userTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <script>
+        // ============================================
+        // BASE DE DATOS LOCAL
+        // ============================================
+        let db = {
+            productos: [
+                { id: 'p1', nombre: 'Tomate', categoria: 'Verduras', unidad: 'kg', precio: 3000, imagen: '🍅', tieneOferta: false },
+                { id: 'p2', nombre: 'Papa Criolla', categoria: 'Verduras', unidad: 'kg', precio: 2500, imagen: '🥔', tieneOferta: true, precioOferta: 1900 },
+                { id: 'p3', nombre: 'Pollo Entero', categoria: 'Carnes', unidad: 'kg', precio: 12000, imagen: '🍗', tieneOferta: false },
+                { id: 'p4', nombre: 'Huevos', categoria: 'Lácteos', unidad: 'docena', precio: 8000, imagen: '🥚', tieneOferta: false },
+                { id: 'p5', nombre: 'Leche Entera', categoria: 'Lácteos', unidad: 'litro', precio: 4000, imagen: '🥛', tieneOferta: true, precioOferta: 3200 },
+            ],
+            ofertas: [
+                { id: 'o1', productoId: 'p2', precioOferta: 1900, fechaInicio: '2026-06-01', fechaFin: '2026-07-15', activa: true },
+                { id: 'o2', productoId: 'p5', precioOferta: 3200, fechaInicio: '2026-06-10', fechaFin: '2026-06-30', activa: true },
+            ],
+            usuarios: [
+                { id: 'u1', nombre: 'Juan Mercader', email: 'mercader@test.com', rol: 'MERCADER', activo: true },
+                { id: 'u2', nombre: 'Admin', email: 'admin@test.com', rol: 'ADMIN', activo: true },
+                { id: 'u3', nombre: 'Pedro Cliente', email: 'pedro@test.com', rol: 'CONSUMER', activo: true },
+            ]
+        };
+
+        // ============================================
+        // ESTADO DEL PANEL
+        // ============================================
+        let currentTab = 'dashboard';
+        let currentProductPage = 1;
+        const itemsPerPage = 5;
+        let editingProductId = null;
+
+        // ============================================
+        // FUNCIONES
+        // ============================================
+        function guardarDatos() {
+            localStorage.setItem('mercadospapp_admin_db', JSON.stringify(db));
+            showToast('✅ Datos guardados correctamente', 'success');
+        }
+
+        function cargarDatos() {
+            try {
+                const saved = localStorage.getItem('mercadospapp_admin_db');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    db = { ...db, ...parsed };
+                }
+            } catch (e) {}
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', info: 'fas fa-info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<i class="${icons[type] || icons.info}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function toggleSidebar(force) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (force === false) { sidebar.classList.remove('open'); overlay.classList.remove('active'); return; }
+            sidebar.classList.toggle('open'); overlay.classList.toggle('active');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.dashboard-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('tab-' + tab);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.sidebar-menu a').forEach(el => {
+                if (el.textContent.toLowerCase().includes(tab)) el.classList.add('active');
+            });
+            const titles = { dashboard: '📊 Panel de Control', productos: '📦 Productos', ofertas: '🏷️ Ofertas', usuarios: '👤 Usuarios' };
+            document.getElementById('panelTitle').textContent = titles[tab] || 'Panel';
+            if (tab === 'productos') renderProducts();
+            if (tab === 'ofertas') renderOffers();
+            if (tab === 'usuarios') renderUsers();
+            if (tab === 'dashboard') updateStats();
+            if (window.innerWidth <= 768) toggleSidebar(false);
+        }
+
+        // ============================================
+        // RENDER: PRODUCTOS
+        // ============================================
+        function renderProducts() {
+            const search = document.getElementById('searchProduct')?.value.toLowerCase() || '';
+            const filtered = db.productos.filter(p => p.nombre.toLowerCase().includes(search));
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentProductPage > totalPages) currentProductPage = 1;
+            const paginated = filtered.slice((currentProductPage - 1) * itemsPerPage, currentProductPage * itemsPerPage);
+
+            const tbody = document.getElementById('productTableBody');
+            if (paginated.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#64748b;">No hay productos</td></tr>`;
+            } else {
+                tbody.innerHTML = paginated.map(p => `
+                    <tr>
+                        <td style="font-size:1.5rem;">${p.imagen || '📦'}</td>
+                        <td><strong>${p.nombre}</strong></td>
+                        <td>${p.categoria}</td>
+                        <td>
+                            <div style="font-weight:700;color:#16a34a;">$${p.precio.toLocaleString()}</div>
+                            ${p.tieneOferta ? `<div style="font-size:0.7rem;color:#ef4444;">Oferta: $${p.precioOferta.toLocaleString()}</div>` : ''}
+                        </td>
+                        <td><span class="status-badge ${p.tieneOferta ? 'offer' : 'inactive'}">${p.tieneOferta ? 'En oferta' : 'Normal'}</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn-edit" onclick="openProductModal('${p.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                                <button class="btn-edit" onclick="toggleOffer('${p.id}')"><i class="fas fa-tag"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('productCountDisplay').textContent = `${filtered.length} productos`;
+            document.getElementById('productPageDisplay').textContent = `${currentProductPage} / ${totalPages || 1}`;
+            document.getElementById('sidebarCount').textContent = db.productos.length;
+            updateStats();
+        }
+
+        function filterProducts() { currentProductPage = 1; renderProducts(); }
+        function changeProductPage(dir) {
+            const search = document.getElementById('searchProduct')?.value.toLowerCase() || '';
+            const filtered = db.productos.filter(p => p.nombre.toLowerCase().includes(search));
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (dir === 'prev' && currentProductPage > 1) currentProductPage--;
+            if (dir === 'next' && currentProductPage < totalPages) currentProductPage++;
+            renderProducts();
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            db.productos = db.productos.filter(p => p.id !== id);
+            db.ofertas = db.ofertas.filter(o => o.productoId !== id);
+            guardarDatos();
+            renderProducts();
+            showToast('🗑️ Producto eliminado', 'success');
+        }
+
+        function toggleOffer(id) {
+            const product = db.productos.find(p => p.id === id);
+            if (!product) return;
+            if (product.tieneOferta) {
+                product.tieneOferta = false;
+                product.precioOferta = null;
+                db.ofertas = db.ofertas.filter(o => o.productoId !== id);
+                showToast('Oferta removida', 'info');
+            } else {
+                const precioOferta = Math.round(product.precio * 0.8);
+                product.tieneOferta = true;
+                product.precioOferta = precioOferta;
+                db.ofertas.push({
+                    id: 'o' + Date.now(),
+                    productoId: id,
+                    precioOferta,
+                    fechaInicio: new Date().toISOString().split('T')[0],
+                    fechaFin: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+                    activa: true
+                });
+                showToast('🔥 Oferta creada!', 'success');
+            }
+            guardarDatos();
+            renderProducts();
+            renderOffers();
+        }
+
+        // ============================================
+        // MODAL: PRODUCTO
+        // ============================================
+        function openProductModal(productId = null) {
+            editingProductId = productId;
+            const product = productId ? db.productos.find(p => p.id === productId) : null;
+            const categories = ['Frutas', 'Verduras', 'Carnes', 'Lácteos', 'Granos', 'Bebidas', 'Otros'];
+            const units = ['kg', 'gramo', 'litro', 'docena', 'unidad', 'bolsa'];
+
+            const html = `
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-${product ? 'edit' : 'plus-circle'}" style="color:#22c55e;"></i> ${product ? 'Editar' : 'Agregar'} Producto</h3>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+                <form id="productForm" onsubmit="saveProduct(event)">
+                    <div class="form-group">
+                        <label>Nombre <span class="required">*</span></label>
+                        <input type="text" id="prodName" value="${product ? product.nombre : ''}" required />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Categoría <span class="required">*</span></label>
+                            <select id="prodCategory" required>
+                                <option value="">Seleccionar</option>
+                                ${categories.map(c => `<option value="${c}" ${product && product.categoria === c ? 'selected' : ''}>${c}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Unidad</label>
+                            <select id="prodUnit">
+                                ${units.map(u => `<option value="${u}" ${product && product.unidad === u ? 'selected' : ''}>${u}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio <span class="required">*</span></label>
+                        <input type="number" id="prodPrice" step="0.01" min="0" value="${product ? product.precio : ''}" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Emoji/Icono</label>
+                        <input type="text" id="prodImage" value="${product ? product.imagen || '' : ''}" maxlength="2" placeholder="🍅" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                        <button type="submit" class="btn-submit">${product ? 'Actualizar' : 'Agregar'}</button>
+                    </div>
+                </form>
+            `;
+
+            document.getElementById('modalContent').innerHTML = html;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('prodName').value.trim();
+            const categoria = document.getElementById('prodCategory').value;
+            const unidad = document.getElementById('prodUnit').value;
+            const precio = parseFloat(document.getElementById('prodPrice').value);
+            const imagen = document.getElementById('prodImage').value.trim() || '📦';
+
+            if (!name || !categoria || isNaN(precio) || precio < 0) {
+                showToast('Completa todos los campos', 'error');
+                return;
+            }
+
+            if (editingProductId) {
+                const product = db.productos.find(p => p.id === editingProductId);
+                if (product) {
+                    product.nombre = name;
+                    product.categoria = categoria;
+                    product.unidad = unidad;
+                    product.precio = precio;
+                    product.imagen = imagen;
+                    showToast('✅ Producto actualizado', 'success');
+                }
+            } else {
+                db.productos.push({
+                    id: 'p' + Date.now(),
+                    nombre: name,
+                    categoria,
+                    unidad,
+                    precio,
+                    imagen,
+                    tieneOferta: false
+                });
+                showToast('✅ Producto creado', 'success');
+            }
+
+            closeModal();
+            guardarDatos();
+            renderProducts();
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+            editingProductId = null;
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ============================================
+        // RENDER: OFERTAS
+        // ============================================
+        function renderOffers() {
+            const tbody = document.getElementById('offerTableBody');
+            const ofertasConProducto = db.ofertas.map(o => {
+                const p = db.productos.find(prod => prod.id === o.productoId);
+                return { ...o, producto: p };
+            });
+
+            if (ofertasConProducto.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#64748b;">No hay ofertas</td></tr>`;
+            } else {
+                tbody.innerHTML = ofertasConProducto.map(o => {
+                    const activa = o.activa && new Date(o.fechaFin) >= new Date();
+                    return `
+                        <tr>
+                            <td><strong>${o.producto ? o.producto.nombre : 'Producto eliminado'}</strong></td>
+                            <td style="font-weight:700;color:#ef4444;">$${o.precioOferta.toLocaleString()}</td>
+                            <td style="font-size:0.75rem;">${o.fechaInicio} → ${o.fechaFin}</td>
+                            <td><span class="status-badge ${activa ? 'active' : 'inactive'}">${activa ? 'Activa' : 'Finalizada'}</span></td>
+                            <td>
+                                ${activa ? `<button class="btn-danger" onclick="cancelOffer('${o.id}')"><i class="fas fa-stop"></i> Cancelar</button>` :
+                                `<span style="color:#64748b;font-size:0.75rem;">Finalizada</span>`}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('offerCount').textContent = db.ofertas.filter(o => o.activa).length;
+            updateStats();
+        }
+
+        function cancelOffer(id) {
+            if (!confirm('¿Cancelar esta oferta?')) return;
+            const offer = db.ofertas.find(o => o.id === id);
+            if (offer) {
+                offer.activa = false;
+                const product = db.productos.find(p => p.id === offer.productoId);
+                if (product) { product.tieneOferta = false; product.precioOferta = null; }
+                guardarDatos();
+                renderOffers();
+                renderProducts();
+                showToast('Oferta cancelada', 'success');
+            }
+        }
+
+        // ============================================
+        // RENDER: USUARIOS
+        // ============================================
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            if (db.usuarios.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#64748b;">No hay usuarios registrados</td></tr>`;
+            } else {
+                tbody.innerHTML = db.usuarios.map(u => `
+                    <tr>
+                        <td><strong>${u.nombre}</strong></td>
+                        <td>${u.email}</td>
+                        <td><span class="status-badge ${u.rol === 'ADMIN' ? 'active' : 'inactive'}">${u.rol}</span></td>
+                        <td><span class="status-badge ${u.activo ? 'active' : 'inactive'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn-edit" onclick="toggleUserStatus('${u.id}')">
+                                    <i class="fas fa-${u.activo ? 'pause' : 'play'}"></i>
+                                </button>
+                                <button class="btn-danger" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('statUsuarios').textContent = db.usuarios.length;
+        }
+
+        function toggleUserStatus(id) {
+            const user = db.usuarios.find(u => u.id === id);
+            if (user) {
+                user.activo = !user.activo;
+                guardarDatos();
+                renderUsers();
+                showToast(`Usuario ${user.activo ? 'activado' : 'desactivado'}`, 'info');
+            }
+        }
+
+        function deleteUser(id) {
+            if (!confirm('¿Eliminar este usuario?')) return;
+            db.usuarios = db.usuarios.filter(u => u.id !== id);
+            guardarDatos();
+            renderUsers();
+            showToast('Usuario eliminado', 'success');
+        }
+
+        // ============================================
+        // ESTADÍSTICAS
+        // ============================================
+        function updateStats() {
+            document.getElementById('statProductos').textContent = db.productos.length;
+            document.getElementById('statOfertas').textContent = db.ofertas.filter(o => o.activa).length;
+            document.getElementById('statUsuarios').textContent = db.usuarios.length;
+            document.getElementById('statCategorias').textContent = [...new Set(db.productos.map(p => p.categoria))].length;
+            document.getElementById('sidebarCount').textContent = db.productos.length;
+        }
+
+        // ============================================
+        // LOGOUT
+        // ============================================
+        function logout() {
+            if (confirm('¿Cerrar sesión?')) {
+                showToast('👋 Sesión cerrada', 'info');
+                setTimeout(() => window.location.href = 'index.html', 500);
+            }
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        cargarDatos();
+        renderProducts();
+        renderOffers();
+        renderUsers();
+        updateStats();
+
+        console.log('🔐 Panel de Administración cargado');
+        console.log('📦 Productos:', db.productos.length);
+        console.log('🏷️ Ofertas:', db.ofertas.length);
+        console.log('👤 Usuarios:', db.usuarios.length);
+    </script>
+</body>
+</html>
